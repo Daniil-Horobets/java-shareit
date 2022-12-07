@@ -1,7 +1,6 @@
 package ru.practicum.shareit.user.dao;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exceptions.UserEmailBlankException;
 import ru.practicum.shareit.exceptions.UserEmailExistsException;
 import ru.practicum.shareit.exceptions.UserEmailMismatchException;
 import ru.practicum.shareit.user.UserMapper;
@@ -21,27 +20,19 @@ public class UserDaoInMemoryImpl implements UserDao {
     private final Map<Long, User> users = new HashMap<>();
     private final Map<String, User> usersByEmails = new HashMap<>();
     private long idCounter = 0;
+    // RFC5322 email format
+    private static final Pattern RFC5322_PATTERN =
+            Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$");
 
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        if (usersByEmails.containsKey(userDto.getEmail())) {
-            throw new UserEmailExistsException("User with this email already exists");
-        } else if (userDto.getEmail() == null || userDto.getEmail().isBlank()) {
-            throw new UserEmailBlankException("User email is blank");
-        } else if (
-            // RFC5322 email format
-                !Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
-                        .matcher(userDto.getEmail())
-                        .matches()) {
-            throw new UserEmailMismatchException("User email format is incorrect");
-        } else {
-            userDto.setId(++idCounter);
-            User user = new User(userDto.getId(), userDto.getName(), userDto.getEmail());
-            users.put(user.getId(), user);
-            usersByEmails.put(user.getEmail(), user);
-            return UserMapper.toUserDto(user);
-        }
+        validateUser(userDto);
+        userDto.setId(++idCounter);
+        User user = new User(userDto.getId(), userDto.getName(), userDto.getEmail());
+        users.put(user.getId(), user);
+        usersByEmails.put(user.getEmail(), user);
+        return UserMapper.toUserDto(user);
     }
 
     @Override
@@ -50,20 +41,9 @@ public class UserDaoInMemoryImpl implements UserDao {
         User user = new User();
         user.setId(id);
         if (userDto.getEmail() != null) {
-            if (usersByEmails.containsKey(userDto.getEmail())) {
-                throw new UserEmailExistsException("User with this email already exists");
-            } else if (userDto.getEmail().isBlank()) {
-                throw new UserEmailBlankException("User email is blank");
-            } else if (
-                // RFC5322 email format
-                    !Pattern.compile("^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
-                            .matcher(userDto.getEmail())
-                            .matches()) {
-                throw new UserEmailMismatchException("User email format is incorrect");
-            } else {
-                usersByEmails.remove(initialUser.getEmail());
-                user.setEmail(userDto.getEmail());
-            }
+            validateUser(userDto);
+            usersByEmails.remove(initialUser.getEmail());
+            user.setEmail(userDto.getEmail());
         } else {
             user.setEmail(initialUser.getEmail());
         }
@@ -96,5 +76,17 @@ public class UserDaoInMemoryImpl implements UserDao {
                 .map(UserMapper::toUserDto)
                 .collect(Collectors.toList()
                 );
+    }
+
+    private void validateUser(UserDto userDto) {
+        if (usersByEmails.containsKey(userDto.getEmail())) {
+            throw new UserEmailExistsException("User with this email already exists");
+        } else if (
+                !RFC5322_PATTERN
+                        .matcher(userDto.getEmail())
+                        .matches()
+        ) {
+            throw new UserEmailMismatchException("User email format is incorrect");
+        }
     }
 }

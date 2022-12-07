@@ -8,6 +8,7 @@ import ru.practicum.shareit.request.ItemRequest;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class Item {
     private long id;
     private String name;

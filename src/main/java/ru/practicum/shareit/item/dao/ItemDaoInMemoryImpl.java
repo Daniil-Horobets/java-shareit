@@ -1,18 +1,12 @@
 package ru.practicum.shareit.item.dao;
 
 import org.springframework.stereotype.Component;
-import ru.practicum.shareit.exceptions.ItemAvailabilityBlankException;
-import ru.practicum.shareit.exceptions.ItemDescriptionBlankException;
-import ru.practicum.shareit.exceptions.ItemNameBlankException;
 import ru.practicum.shareit.exceptions.ItemOwnerMismatchException;
 import ru.practicum.shareit.item.ItemMapper;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,23 +17,15 @@ public class ItemDaoInMemoryImpl implements ItemDao {
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long owner) {
-        if (itemDto.getAvailable() == null) {
-            throw new ItemAvailabilityBlankException("Item availability is blank");
-        }
-        if (itemDto.getName() == null || itemDto.getName().isBlank()) {
-            throw new ItemNameBlankException("Item availability is blank");
-        }
-        if (itemDto.getDescription() == null || itemDto.getDescription().isBlank()) {
-            throw new ItemDescriptionBlankException("Item description is blank");
-        }
         itemDto.setId(++idCounter);
-        Item item = new Item(
-                itemDto.getId(),
-                itemDto.getName(),
-                itemDto.getDescription(),
-                itemDto.getAvailable(),
-                owner,
-                null);
+        Item item = Item.builder()
+                .id(itemDto.getId())
+                .name(itemDto.getName())
+                .description(itemDto.getDescription())
+                .available(itemDto.getAvailable())
+                .owner(owner)
+                .request(null)
+                .build();
         items.put(item.getId(), item);
         return ItemMapper.toItemDto(item);
     }
@@ -85,7 +71,7 @@ public class ItemDaoInMemoryImpl implements ItemDao {
                     ).map(ItemMapper::toItemDto)
                     .collect(Collectors.toList());
         } else {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
     }
 }
