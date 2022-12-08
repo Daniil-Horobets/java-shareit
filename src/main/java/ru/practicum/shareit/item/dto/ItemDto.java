@@ -12,6 +12,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Builder
 public class ItemDto {
     private long id;
     @NotBlank(groups = Create.class, message = "Item name is blank")
