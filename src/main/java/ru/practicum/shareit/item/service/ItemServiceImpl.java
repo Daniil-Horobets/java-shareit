@@ -110,11 +110,12 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public CommentDto createComment(CommentDto commentDto, long itemId, long userId) {
-        boolean isBookingsOfItemByUserEmpty = bookingRepository.findByBooker_IdAndItem_IdAndStatusAndEndBefore(
+        LocalDateTime now = LocalDateTime.now();
+        boolean isBookingsOfItemByUserEmpty = bookingRepository.findByBookerIdAndItemIdAndStatusAndEndBefore(
                 userId,
                 itemId,
                 Status.APPROVED,
-                LocalDateTime.now()
+                now
         ).isEmpty();
         if (isBookingsOfItemByUserEmpty) {
             throw new BookingStatusMismatchException("User did not booked item or booking was rejected or " +
@@ -126,7 +127,7 @@ public class ItemServiceImpl implements ItemService {
                         .orElseThrow(() -> new ItemNotFoundException(ErrorHandler.ITEM_NOT_FOUND)))
                 .author(userRepository.findById(userId)
                         .orElseThrow(() -> new UserNotFoundException(ErrorHandler.USER_NOT_FOUND)))
-                .created(LocalDateTime.now())
+                .created(now)
                 .build();
         return CommentMapper.toCommentDto(commentRepository.save(comment));
     }
@@ -134,15 +135,16 @@ public class ItemServiceImpl implements ItemService {
     private ItemDtoBooking setBookingsAndCommentsToItem(long owner, Item item) {
         ItemDtoBooking itemDtoBooking = ItemMapper.toItemDtoBooking(item);
         if (item.getOwner().getId() == owner) {
+            LocalDateTime now = LocalDateTime.now();
             itemDtoBooking.setLastBooking(
-                    bookingRepository.findByItem_IdAndEndBeforeOrderByEndDesc(
+                    bookingRepository.findByItemIdAndEndBeforeOrderByEndDesc(
                             itemDtoBooking.getId(),
-                            LocalDateTime.now()
+                            now
                     ).map(BookingMapper::toBookingDto).orElse(null));
             itemDtoBooking.setNextBooking(
-                    bookingRepository.findByItem_IdAndStartAfterOrderByEndAsc(
+                    bookingRepository.findByItemIdAndStartAfterOrderByEndAsc(
                             itemDtoBooking.getId(),
-                            LocalDateTime.now()
+                            now
                     ).map(BookingMapper::toBookingDto).orElse(null));
         } else {
             itemDtoBooking.setLastBooking(null);

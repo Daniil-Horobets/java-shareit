@@ -11,55 +11,55 @@ import java.util.Optional;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Long> {
-    List<Booking> findByBooker_IdOrderByStartDesc(
+    List<Booking> findByBookerIdOrderByStartDesc(
             Long userId);
 
-    List<Booking> findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(
+    List<Booking> findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
             Long userId,
             LocalDateTime start,
             LocalDateTime end);
 
-    List<Booking> findByBooker_IdAndEndBeforeOrderByStartDesc(
+    List<Booking> findByBookerIdAndEndBeforeOrderByStartDesc(
             Long userId,
             LocalDateTime end);
 
-    List<Booking> findByBooker_IdAndStartAfterOrderByStartDesc(
+    List<Booking> findByBookerIdAndStartAfterOrderByStartDesc(
             Long userId,
             LocalDateTime start);
 
-    List<Booking> findByBooker_IdAndStatusOrderByStartDesc(
+    List<Booking> findByBookerIdAndStatusOrderByStartDesc(
             Long userId,
             Status status);
 
-    List<Booking> findByItem_Owner_IdOrderByStartDesc(
+    List<Booking> findByItemOwnerIdOrderByStartDesc(
             Long userId);
 
-    List<Booking> findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(
+    List<Booking> findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
             Long userId,
             LocalDateTime start,
             LocalDateTime end);
 
-    List<Booking> findByItem_Owner_IdAndEndBeforeOrderByStartDesc(
+    List<Booking> findByItemOwnerIdAndEndBeforeOrderByStartDesc(
             Long userId,
             LocalDateTime end);
 
-    List<Booking> findByItem_Owner_IdAndStartAfterOrderByStartDesc(
+    List<Booking> findByItemOwnerIdAndStartAfterOrderByStartDesc(
             Long userId,
             LocalDateTime start);
 
-    List<Booking> findByItem_Owner_IdAndStatusOrderByStartDesc(
+    List<Booking> findByItemOwnerIdAndStatusOrderByStartDesc(
             Long userId,
             Status status);
 
-    Optional<Booking> findByItem_IdAndEndBeforeOrderByEndDesc(
+    Optional<Booking> findByItemIdAndEndBeforeOrderByEndDesc(
             Long itemId,
             LocalDateTime end);
 
-    Optional<Booking> findByItem_IdAndStartAfterOrderByEndAsc(
+    Optional<Booking> findByItemIdAndStartAfterOrderByEndAsc(
             Long itemId,
             LocalDateTime end);
 
-    List<Booking> findByBooker_IdAndItem_IdAndStatusAndEndBefore(
+    List<Booking> findByBookerIdAndItemIdAndStatusAndEndBefore(
             Long userId,
             Long itemId,
             Status status,

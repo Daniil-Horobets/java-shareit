@@ -46,8 +46,9 @@ public class BookingServiceImpl implements BookingService {
         if (item.getOwner().equals(user)) {
             throw new ItemOwnerMismatchException("Owner can not book his own items");
         }
-        boolean isTimeNotCorrect = bookingDto.getStart().isBefore(LocalDateTime.now()) ||
-                bookingDto.getEnd().isBefore(LocalDateTime.now()) ||
+        LocalDateTime now = LocalDateTime.now();
+        boolean isTimeNotCorrect = bookingDto.getStart().isBefore(now) ||
+                bookingDto.getEnd().isBefore(now) ||
                 bookingDto.getEnd().isBefore(bookingDto.getStart());
         if (isTimeNotCorrect) {
             throw new BookingTimeMismatchException(ErrorHandler.BOOKING_TIME_MISMATCH);
@@ -98,49 +99,44 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDtoResponse> getBookings(String state, long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ErrorHandler.USER_NOT_FOUND));
+        LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case "ALL":
-                return bookingRepository.findByBooker_IdOrderByStartDesc(
-                        userId
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdOrderByStartDesc(
+                            userId
+                        ));
             case "CURRENT":
-                return bookingRepository.findByBooker_IdAndStartBeforeAndEndAfterOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now(),
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                            userId,
+                            now,
+                            now
+                        ));
             case "PAST":
-                return bookingRepository.findByBooker_IdAndEndBeforeOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
+                            userId,
+                            now
+                        ));
             case "FUTURE":
-                return bookingRepository.findByBooker_IdAndStartAfterOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
+                            userId,
+                            now
+                        ));
             case "WAITING":
-                return bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(
-                        userId,
-                        Status.WAITING
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+                            userId,
+                            Status.WAITING
+                        ));
             case "REJECTED":
-                return bookingRepository.findByBooker_IdAndStatusOrderByStartDesc(
-                        userId,
-                        Status.REJECTED
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
+                            userId,
+                            Status.REJECTED
+                        ));
             default:
                 throw new BookingStatusMismatchException("Unknown state: " + state);
         }
@@ -150,51 +146,52 @@ public class BookingServiceImpl implements BookingService {
     public List<BookingDtoResponse> getItemsOwnerBookings(String state, long userId) {
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ErrorHandler.USER_NOT_FOUND));
+        LocalDateTime now = LocalDateTime.now();
         switch (state) {
             case "ALL":
-                return bookingRepository.findByItem_Owner_IdOrderByStartDesc(
-                        userId
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdOrderByStartDesc(
+                            userId
+                        ));
             case "CURRENT":
-                return bookingRepository.findByItem_Owner_IdAndStartBeforeAndEndAfterOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now(),
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
+                            userId,
+                            now,
+                            now
+                        ));
             case "PAST":
-                return bookingRepository.findByItem_Owner_IdAndEndBeforeOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
+                            userId,
+                            now
+                        ));
             case "FUTURE":
-                return bookingRepository.findByItem_Owner_IdAndStartAfterOrderByStartDesc(
-                        userId,
-                        LocalDateTime.now()
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
+                            userId,
+                            now
+                        ));
             case "WAITING":
-                return bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(
-                        userId,
-                        Status.WAITING
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                            userId,
+                            Status.WAITING
+                        ));
             case "REJECTED":
-                return bookingRepository.findByItem_Owner_IdAndStatusOrderByStartDesc(
-                        userId,
-                        Status.REJECTED
-                    ).stream()
-                    .map(BookingMapper::toBookingDtoResponse)
-                    .collect(Collectors.toList());
+                return bookingsToBookingDtoResponses(
+                        bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
+                            userId,
+                            Status.REJECTED
+                        ));
             default:
                 throw new BookingStatusMismatchException("Unknown state: " + state);
         }
+    }
+
+    private List<BookingDtoResponse> bookingsToBookingDtoResponses(List<Booking> bookings) {
+        return bookings.stream()
+                .map(BookingMapper::toBookingDtoResponse)
+                .collect(Collectors.toList());
     }
 }
