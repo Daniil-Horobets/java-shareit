@@ -54,9 +54,7 @@ class ItemServiceTest {
     @Mock
     private ItemRequestRepository itemRequestRepository;
 
-    LocalDateTime now;
-    LocalDateTime start;
-    LocalDateTime end;
+    private LocalDateTime now;
     private User user1;
     private User user2;
     private Item item1;
@@ -67,8 +65,8 @@ class ItemServiceTest {
     @BeforeEach
     void beforeEach() {
         now = LocalDateTime.now();
-        start = now.plusDays(1);
-        end = now.plusDays(2);
+        LocalDateTime start = now.plusDays(1);
+        LocalDateTime end = now.plusDays(2);
 
         user1 = new User(1, "User1 name", "user1@mail.com");
         user2 = new User(2, "User2 name", "user2@mail.com");

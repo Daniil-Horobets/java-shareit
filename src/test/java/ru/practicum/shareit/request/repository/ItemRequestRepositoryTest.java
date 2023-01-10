@@ -18,19 +18,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class ItemRequestRepositoryTest {
 
     @Autowired
-    ItemRequestRepository itemRequestRepository;
+    private ItemRequestRepository itemRequestRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
 
-    LocalDateTime now;
     private User user1;
     private ItemRequest itemRequest1;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
         user1 = new User(1, "User1 name", "user1@mail.com");
         user1 = userRepository.save(user1);
 

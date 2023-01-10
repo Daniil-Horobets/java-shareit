@@ -26,7 +26,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ItemDtoBookingTest {
 
     @Autowired
-    JacksonTester<ItemDtoBooking> json;
+    private JacksonTester<ItemDtoBooking> json;
 
     private ItemDtoBooking item1DtoBooking;
 

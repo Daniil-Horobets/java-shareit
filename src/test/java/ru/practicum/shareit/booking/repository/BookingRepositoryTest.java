@@ -24,16 +24,16 @@ import static org.junit.jupiter.api.Assertions.*;
 class BookingRepositoryTest {
 
     @Autowired
-    BookingRepository bookingRepository;
+    private BookingRepository bookingRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
 
-    LocalDateTime now;
+    private LocalDateTime now;
     private LocalDateTime start;
     private LocalDateTime end;
     private User user1;

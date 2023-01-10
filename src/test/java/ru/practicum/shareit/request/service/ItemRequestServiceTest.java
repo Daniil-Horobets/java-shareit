@@ -44,7 +44,7 @@ class ItemRequestServiceTest {
     @Mock
     private ItemRepository itemRepository;
 
-    LocalDateTime now;
+    private LocalDateTime now;
     private User user1;
     private User user2;
     private ItemRequest itemRequest1;

@@ -19,14 +19,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CommentDtoTest {
 
     @Autowired
-    JacksonTester<CommentDto> json;
+    private JacksonTester<CommentDto> json;
 
-    LocalDateTime now;
     private CommentDto comment1Dto;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         User user1 = new User(1, "User1 name", "user1@mail.com");
         User user2 = new User(2, "User2 name", "user2@mail.com");

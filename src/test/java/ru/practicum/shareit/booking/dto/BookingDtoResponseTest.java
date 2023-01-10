@@ -19,18 +19,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 @JsonTest
 class BookingDtoResponseTest {
     @Autowired
-    JacksonTester<BookingDtoResponse> json;
+    private JacksonTester<BookingDtoResponse> json;
 
-    LocalDateTime now;
-    LocalDateTime start;
-    LocalDateTime end;
     private BookingDtoResponse booking1DtoResponse;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
-        start = now.plusDays(1);
-        end = now.plusDays(2);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = now.plusDays(1);
+        LocalDateTime end = now.plusDays(2);
 
         User user1 = new User(1, "User1 name", "user1@mail.com");
         User user2 = new User(2, "User2 name", "user2@mail.com");

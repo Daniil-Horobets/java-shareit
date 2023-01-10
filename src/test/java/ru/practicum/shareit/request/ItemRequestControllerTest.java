@@ -40,13 +40,12 @@ class ItemRequestControllerTest {
     private ObjectMapper mapper;
 
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    LocalDateTime now;
     private UserDto user1Dto;
     private ItemRequestDto itemRequest1Dto;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         User user1 = new User(1, "User1 name", "user1@mail.com");
         user1Dto = UserMapper.toUserDto(user1);

@@ -21,15 +21,14 @@ import static org.junit.jupiter.api.Assertions.*;
 class ItemRepositoryTest {
 
     @Autowired
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     @Autowired
-    ItemRequestRepository itemRequestRepository;
+    private ItemRequestRepository itemRequestRepository;
 
-    LocalDateTime now;
     private User user1;
     private ItemRequest itemRequest1;
     private Item item1;
@@ -37,7 +36,7 @@ class ItemRepositoryTest {
     @BeforeEach
     void beforeEach() {
 
-        now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         user1 = new User(1, "User1 name", "user1@mail.com");
         User user2 = new User(2, "User2 name", "user2@mail.com");

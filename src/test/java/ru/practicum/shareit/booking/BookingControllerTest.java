@@ -42,18 +42,15 @@ class BookingControllerTest {
     private ObjectMapper mapper;
 
     private static final String USER_ID_HEADER = "X-Sharer-User-Id";
-    LocalDateTime now;
-    LocalDateTime start;
-    LocalDateTime end;
     private UserDto user2Dto;
     private BookingDto booking1Dto;
     private BookingDtoResponse booking1DtoResponse;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
-        start = now.plusDays(1);
-        end = now.plusDays(2);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime start = now.plusDays(1);
+        LocalDateTime end = now.plusDays(2);
 
         User user1 = new User(1, "User1 name", "user1@mail.com");
         User user2 = new User(2, "User2 name", "user2@mail.com");

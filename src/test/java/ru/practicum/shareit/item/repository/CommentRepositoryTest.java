@@ -19,21 +19,20 @@ import static org.junit.jupiter.api.Assertions.*;
 class CommentRepositoryTest {
 
     @Autowired
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
-    ItemRepository itemRepository;
+    private ItemRepository itemRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
-    LocalDateTime now;
     private Item item1;
     private Comment comment1;
 
     @BeforeEach
     void beforeEach() {
-        now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now();
 
         User user1 = userRepository.save(new User(1, "User1 name", "user1@mail.com"));
         User user2 = userRepository.save(new User(2, "User2 name", "user2@mail.com"));
