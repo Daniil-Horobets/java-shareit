@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.Status;
@@ -96,7 +97,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoResponse> getBookings(String state, long userId) {
+    public List<BookingDtoResponse> getBookings(String state, long userId, int from, int size) {
+        int page = from / size;
+        PageRequest pageRequest = PageRequest.of(page, size);
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ErrorHandler.USER_NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
@@ -104,38 +107,44 @@ public class BookingServiceImpl implements BookingService {
             case "ALL":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdOrderByStartDesc(
-                            userId
+                            userId,
+                            pageRequest
                         ));
             case "CURRENT":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                             userId,
                             now,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "PAST":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdAndEndBeforeOrderByStartDesc(
                             userId,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "FUTURE":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdAndStartAfterOrderByStartDesc(
                             userId,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "WAITING":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                             userId,
-                            Status.WAITING
+                            Status.WAITING,
+                            pageRequest
                         ));
             case "REJECTED":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByBookerIdAndStatusOrderByStartDesc(
                             userId,
-                            Status.REJECTED
+                            Status.REJECTED,
+                            pageRequest
                         ));
             default:
                 throw new BookingStatusMismatchException("Unknown state: " + state);
@@ -143,7 +152,9 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public List<BookingDtoResponse> getItemsOwnerBookings(String state, long userId) {
+    public List<BookingDtoResponse> getItemsOwnerBookings(String state, long userId, int from, int size) {
+        int page = from / size;
+        PageRequest pageRequest = PageRequest.of(page, size);
         userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException(ErrorHandler.USER_NOT_FOUND));
         LocalDateTime now = LocalDateTime.now();
@@ -151,38 +162,44 @@ public class BookingServiceImpl implements BookingService {
             case "ALL":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdOrderByStartDesc(
-                            userId
+                            userId,
+                            pageRequest
                         ));
             case "CURRENT":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdAndStartBeforeAndEndAfterOrderByStartDesc(
                             userId,
                             now,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "PAST":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdAndEndBeforeOrderByStartDesc(
                             userId,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "FUTURE":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdAndStartAfterOrderByStartDesc(
                             userId,
-                            now
+                            now,
+                            pageRequest
                         ));
             case "WAITING":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                             userId,
-                            Status.WAITING
+                            Status.WAITING,
+                            pageRequest
                         ));
             case "REJECTED":
                 return bookingsToBookingDtoResponses(
                         bookingRepository.findByItemOwnerIdAndStatusOrderByStartDesc(
                             userId,
-                            Status.REJECTED
+                            Status.REJECTED,
+                            pageRequest
                         ));
             default:
                 throw new BookingStatusMismatchException("Unknown state: " + state);

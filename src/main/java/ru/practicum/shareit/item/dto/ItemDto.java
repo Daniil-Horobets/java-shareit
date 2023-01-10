@@ -2,7 +2,6 @@ package ru.practicum.shareit.item.dto;
 
 import lombok.*;
 import ru.practicum.shareit.item.Create;
-import ru.practicum.shareit.request.ItemRequest;
 import ru.practicum.shareit.user.model.User;
 
 import javax.validation.constraints.NotBlank;
@@ -23,5 +22,5 @@ public class ItemDto {
     @NotNull(groups = Create.class, message = "Item availability is blank")
     private Boolean available;
     private User owner;
-    private ItemRequest request;
+    private Long requestId;
 }

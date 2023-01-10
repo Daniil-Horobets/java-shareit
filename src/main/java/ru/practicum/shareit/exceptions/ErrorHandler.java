@@ -15,6 +15,7 @@ public class ErrorHandler {
     public static final String ITEM_OWNER_MISMATCH = "User not an item owner";
     public static final String USER_EMAIL_MISMATCH = "User email format is incorrect";
     public static final String BOOKING_TIME_MISMATCH = "Booking time is incorrect";
+    public static final String ITEM_REQUEST_NOT_FOUND = "Item request not found";
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -55,6 +56,12 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleBookingNotFoundException(final BookingNotFoundException e) {
+        return new ErrorResponse(e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleItemRequestNotFoundException(final ItemRequestNotFoundException e) {
         return new ErrorResponse(e.getMessage());
     }
 }
