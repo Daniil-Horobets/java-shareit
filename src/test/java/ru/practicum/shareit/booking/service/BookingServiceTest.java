@@ -14,8 +14,7 @@ import ru.practicum.shareit.booking.Status;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.repository.BookingRepository;
-import ru.practicum.shareit.exceptions.BookingStatusMismatchException;
-import ru.practicum.shareit.exceptions.ItemOwnerMismatchException;
+import ru.practicum.shareit.exceptions.*;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.user.model.User;
@@ -46,6 +45,7 @@ class BookingServiceTest {
     private LocalDateTime end;
     private User user1;
     private User user2;
+    private User user3;
     private Item item1;
     private Booking booking1;
 
@@ -57,6 +57,7 @@ class BookingServiceTest {
 
         user1 = new User(1, "User1 name", "user1@mail.com");
         user2 = new User(2, "User2 name", "user2@mail.com");
+        user3 = new User(3, "User3 name", "user3@mail.com");
 
         item1 = Item.builder()
                 .id(1)
@@ -116,6 +117,60 @@ class BookingServiceTest {
     }
 
     @Test
+    void createBookingOnNotAvailableItemTest() {
+        item1.setAvailable(false);
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item1));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        BookingStatusMismatchException exception = assertThrows(BookingStatusMismatchException.class,
+                () -> bookingService.createBooking(
+                        BookingMapper.toBookingDto(booking1),
+                        user1.getId()));
+
+        assertEquals("Item is not available", exception.getMessage());
+    }
+
+    @Test
+    void createBookingWithWrongTimeTest() {
+        booking1.setStart(LocalDateTime.now().minusDays(3));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(item1));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        BookingTimeMismatchException exception = assertThrows(BookingTimeMismatchException.class,
+                () -> bookingService.createBooking(
+                        BookingMapper.toBookingDto(booking1),
+                        user2.getId()));
+
+        assertEquals("Booking time is incorrect", exception.getMessage());
+    }
+
+    @Test
+    void createBookingOnNotExistingItemTest() {
+        booking1.setStart(LocalDateTime.now().minusDays(3));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+        when(itemRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        ItemNotFoundException exception = assertThrows(ItemNotFoundException.class,
+                () -> bookingService.createBooking(
+                        BookingMapper.toBookingDto(booking1),
+                        user2.getId()));
+
+        assertEquals("Item not found", exception.getMessage());
+    }
+
+    @Test
     void updateBookingTest() {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking1));
@@ -138,6 +193,84 @@ class BookingServiceTest {
     }
 
     @Test
+    void updateBookingWithWrongIdTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.empty());
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        BookingNotFoundException exception = assertThrows(BookingNotFoundException.class,
+                () -> bookingService.updateBooking(
+                        booking1.getId(),
+                        true,
+                        user2.getId()));
+
+        assertEquals("Booking not found", exception.getMessage());
+    }
+
+    @Test
+    void updateBookingFromWrongUserTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking1));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        ItemOwnerMismatchException exception = assertThrows(ItemOwnerMismatchException.class,
+                () -> bookingService.updateBooking(
+                        booking1.getId(),
+                        true,
+                        user2.getId()));
+
+        assertEquals("User not an item owner", exception.getMessage());
+    }
+
+    @Test
+    void updateBookingWithWrongStatusTest() {
+        booking1.setStatus(Status.REJECTED);
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking1));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        BookingStatusMismatchException exception = assertThrows(BookingStatusMismatchException.class,
+                () -> bookingService.updateBooking(
+                        booking1.getId(),
+                        true,
+                        user1.getId()));
+
+        assertEquals("Current booking status is " + booking1.getStatus() +
+                ", but should be " + Status.WAITING, exception.getMessage());
+    }
+
+    @Test
+    void updateBookingRejectTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking1));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user1));
+        when(bookingRepository.save(any(Booking.class)))
+                .thenReturn(booking1);
+
+        BookingDtoResponse bookingDtoResponse = bookingService.updateBooking(
+                booking1.getId(),
+                false,
+                user1.getId());
+
+        assertEquals(1, bookingDtoResponse.getId());
+        assertEquals(start, bookingDtoResponse.getStart());
+        assertEquals(end, bookingDtoResponse.getEnd());
+        assertEquals(item1, bookingDtoResponse.getItem());
+        assertEquals(user2, bookingDtoResponse.getBooker());
+        assertEquals(Status.REJECTED, bookingDtoResponse.getStatus());
+    }
+
+    @Test
     void getBookingTest() {
         when(bookingRepository.findById(anyLong()))
                 .thenReturn(Optional.ofNullable(booking1));
@@ -154,6 +287,21 @@ class BookingServiceTest {
         assertEquals(item1, bookingDtoResponse.getItem());
         assertEquals(user2, bookingDtoResponse.getBooker());
         assertEquals(Status.WAITING, bookingDtoResponse.getStatus());
+    }
+
+    @Test
+    void getBookingFromWrongUserTest() {
+        when(bookingRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(booking1));
+        when(userRepository.findById(anyLong()))
+                .thenReturn(Optional.ofNullable(user2));
+
+        ItemOwnerMismatchException exception = assertThrows(ItemOwnerMismatchException.class,
+                () -> bookingService.getBooking(
+                        booking1.getId(),
+                        user3.getId()));
+
+        assertEquals("User is not a booker or item owner", exception.getMessage());
     }
 
     @Test
