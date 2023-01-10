@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.booking.BookingMapper;
 import ru.practicum.shareit.booking.Status;
@@ -15,6 +16,8 @@ import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.repository.UserRepository;
 import ru.practicum.shareit.user.model.User;
 
@@ -30,29 +33,37 @@ public class ItemServiceImpl implements ItemService {
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
     private final CommentRepository commentRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Autowired
     public ItemServiceImpl(ItemRepository itemRepository,
                            UserRepository userRepository,
                            BookingRepository bookingRepository,
-                           CommentRepository commentRepository) {
+                           CommentRepository commentRepository,
+                           ItemRequestRepository itemRequestRepository) {
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
         this.bookingRepository = bookingRepository;
         this.commentRepository = commentRepository;
+        this.itemRequestRepository = itemRequestRepository;
     }
 
     @Override
     public ItemDto createItem(ItemDto itemDto, long owner) {
         User user = userRepository.findById(owner)
                 .orElseThrow(() -> new ItemOwnerMismatchException("User specified as item owner does not exist"));
+        ItemRequest request = null;
+        if (itemDto.getRequestId() != null) {
+            request = itemRequestRepository.findById(itemDto.getRequestId())
+                    .orElseThrow(() -> new ItemRequestNotFoundException(ErrorHandler.ITEM_REQUEST_NOT_FOUND));
+        }
         Item item = Item.builder()
                 .id(itemDto.getId())
                 .name(itemDto.getName())
                 .description(itemDto.getDescription())
                 .available(itemDto.getAvailable())
                 .owner(user)
-                .request(null)
+                .request(request)
                 .build();
         return ItemMapper.toItemDto(itemRepository.save(item));
     }
@@ -76,8 +87,8 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getOwner() != null) {
             initialItem.setOwner(itemDto.getOwner());
         }
-        if (itemDto.getRequest() != null) {
-            initialItem.setRequest(itemDto.getRequest());
+        if (itemDto.getRequestId() != null) {
+            initialItem.setRequestId(itemDto.getRequestId());
         }
         itemRepository.save(ItemMapper.toItem(initialItem));
         return initialItem;
@@ -91,18 +102,24 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<ItemDtoBooking> getUserItems(long owner) {
-        return itemRepository.findByOwnerIdOrderById(owner).stream()
+    public List<ItemDtoBooking> getUserItems(long owner, int from, int size) {
+        int page = from / size;
+        return itemRepository.findByOwnerIdOrderById(owner, PageRequest.of(page, size)).stream()
                 .map(item -> setBookingsAndCommentsToItem(owner, item))
                 .collect(Collectors.toList());
     }
 
     @Override
-    public List<ItemDto> findItem(String text) {
+    public List<ItemDto> findItem(String text, int from, int size) {
+        int page = from / size;
         if (text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(text, text)
+        return itemRepository.findByNameOrDescriptionContainingIgnoreCaseAndAvailableTrue(
+                        text,
+                        text,
+                        PageRequest.of(page, size)
+                )
                 .stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());

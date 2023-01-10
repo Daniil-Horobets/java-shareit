@@ -1,14 +1,17 @@
 package ru.practicum.shareit.booking;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingDtoResponse;
 import ru.practicum.shareit.booking.service.BookingService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
-
+@Validated
 @RestController
 @RequestMapping("/bookings")
 public class BookingController {
@@ -46,15 +49,19 @@ public class BookingController {
 
     @GetMapping
     public List<BookingDtoResponse> getBookings(
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+            @Positive @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "ALL") String state,
             @RequestHeader(USER_ID_HEADER) long userId) {
-        return bookingService.getBookings(state, userId);
+        return bookingService.getBookings(state, userId, from, size);
     }
 
     @GetMapping("/owner")
     public List<BookingDtoResponse> getItemsOwnerBookings(
+            @PositiveOrZero @RequestParam(required = false, defaultValue = "0") int from,
+            @Positive @RequestParam(required = false, defaultValue = "10") int size,
             @RequestParam(required = false, defaultValue = "ALL") String state,
             @RequestHeader(USER_ID_HEADER) long userId) {
-        return bookingService.getItemsOwnerBookings(state, userId);
+        return bookingService.getItemsOwnerBookings(state, userId, from, size);
     }
 }
