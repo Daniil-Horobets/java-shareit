@@ -51,7 +51,7 @@ public class BookingController {
 	@GetMapping
 	public ResponseEntity<Object> getBookings(
 			@RequestHeader(USER_ID_HEADER) long userId,
-			@RequestParam(defaultValue = "all") String stateParam,
+			@RequestParam(name = "state", defaultValue = "all") String stateParam,
 			@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
 			@Positive @RequestParam(defaultValue = "10") Integer size) {
 		BookingState state = BookingState.from(stateParam)
@@ -63,7 +63,7 @@ public class BookingController {
 	@GetMapping("/owner")
 	public ResponseEntity<Object> getItemsOwnerBookings(
 			@RequestHeader(USER_ID_HEADER) long userId,
-			@RequestParam(defaultValue = "all") String stateParam,
+			@RequestParam(name = "state", defaultValue = "all") String stateParam,
 			@PositiveOrZero @RequestParam(defaultValue = "0") Integer from,
 			@Positive @RequestParam(defaultValue = "10") Integer size) {
 		BookingState state = BookingState.from(stateParam)
